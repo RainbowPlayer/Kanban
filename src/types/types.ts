@@ -8,7 +8,7 @@ export interface User {
 export interface Issue {
     id: number;
     title: string;
-    state: 'open' | 'closed';
+    state: 'open' | 'in progress' | 'closed';
     comments: number;
     created_at: string;
     updated_at: string;
@@ -20,8 +20,9 @@ export interface IssueCardProps {
     id: number;
     number: number;
     title: string;
-    state: 'open' | 'closed';
+    state: 'open' | 'in progress' | 'closed';
     comments: number;
     created_at: string;
     user: User;
+    onDragStart: (e: React.DragEvent, id: number) => void;
 }

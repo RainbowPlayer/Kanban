@@ -1,9 +1,14 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Issue } from '../../types/types';
 
 interface IssuesState {
   entities: Issue[];
   loading: 'idle' | 'pending' | 'succeeded' | 'failed';
+}
+
+interface UpdateIssuePayload {
+  id: number;
+  newState: 'open' | 'in progress' | 'closed';
 }
 
 const initialState: IssuesState = {
@@ -13,8 +18,8 @@ const initialState: IssuesState = {
 
 export const fetchIssues = createAsyncThunk(
   'issues/fetchIssues',
-  async () => {
-    const response = await fetch('https://api.github.com/repos/facebook/react/issues');
+  async ({owner, repo}: {owner: string, repo: string}) => {
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`);
     if (!response.ok) {
       throw new Error('Failed to fetch issues');
     }
@@ -23,10 +28,18 @@ export const fetchIssues = createAsyncThunk(
   }
 );
 
+
 const issuesSlice = createSlice({
   name: 'issues',
   initialState,
   reducers: {
+    updateIssueState: (state, action: PayloadAction<UpdateIssuePayload>) => {
+      const { id, newState } = action.payload;
+      const issue = state.entities.find(issue => issue.id === id);
+      if (issue) {
+        issue.state = newState;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -42,5 +55,7 @@ const issuesSlice = createSlice({
       });
   },
 });
+
+export const { updateIssueState } = issuesSlice.actions;
 
 export default issuesSlice.reducer;
